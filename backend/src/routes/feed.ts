@@ -19,26 +19,14 @@ router.post('/partner-a', optionalApiKeyAuth, (req: Request, res: Response) => {
     const result = feedHandler.handlePartnerA(req.body, idempotencyKey);
     
     if (result.success) {
-      // If duplicate was detected, return 200 with existing order (idempotent)
-      if (result.duplicate) {
-        return res.status(200).json({ 
-          success: true, 
-          message: 'Order already processed (duplicate detected)',
-          orderEvent: result.orderEvent,
-          duplicate: true
-        });
-      }
-      
       res.status(200).json({ 
         success: true, 
-        message: 'Order processed successfully',
-        orderEvent: result.orderEvent
+        message: result.message,
       });
     } else {
       res.status(400).json({ 
         success: false, 
-        message: 'Validation failed',
-        errorEvent: result.errorEvent
+        message: result.message
       });
     }
   } catch (error) {
@@ -61,26 +49,14 @@ router.post('/partner-b', optionalApiKeyAuth, (req: Request, res: Response) => {
     const result = feedHandler.handlePartnerB(req.body, idempotencyKey);
     
     if (result.success) {
-      // If duplicate was detected, return 200 with existing order (idempotent)
-      if (result.duplicate) {
-        return res.status(200).json({ 
-          success: true, 
-          message: 'Order already processed (duplicate detected)',
-          orderEvent: result.orderEvent,
-          duplicate: true
-        });
-      }
-      
       res.status(200).json({ 
         success: true, 
-        message: 'Order processed successfully',
-        orderEvent: result.orderEvent
+        message: result.message,
       });
     } else {
       res.status(400).json({ 
         success: false, 
-        message: 'Validation failed',
-        errorEvent: result.errorEvent
+        message: result.message
       });
     }
   } catch (error) {

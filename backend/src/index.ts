@@ -1,17 +1,28 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
-// Load environment variables FIRST before importing modules that use them
+import dotenv from 'dotenv';
 dotenv.config();
 
 import feedRoutes from './routes/feed';
 import ordersRoutes from './routes/orders';
 import errorsRoutes from './routes/errors';
 import { partnerService } from './services/partnerService';
+import { errorProcessor } from './services/errorProcessor';
+import { orderProcessor } from './services/orderProcessor';
+import { validOrdersStream, errorOrdersStream } from './services/streams';
+import { ErrorEvent, OrderEvent } from './types';
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize stream subscriptions (decoupled architecture)
+// This sets up the event-driven flow where processors consume from streams
+errorOrdersStream.subscribe((error: ErrorEvent) => errorProcessor.processError(error));
+validOrdersStream.subscribe((order: OrderEvent) => {
+  orderProcessor.processOrder(order);
+});
 
 // Middleware
 app.use(cors());

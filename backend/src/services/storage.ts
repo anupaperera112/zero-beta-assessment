@@ -86,7 +86,7 @@ class Storage {
     }
 
     // Sort by eventTime descending (most recent first)
-    return orders.sort((a, b) => 
+    return orders.sort((a, b) =>
       new Date(b.eventTime).getTime() - new Date(a.eventTime).getTime()
     );
   }
@@ -98,7 +98,7 @@ class Storage {
     orderCount: number;
   } {
     const orders = this.getOrders(partnerId);
-    
+
     const startDate = new Date(Date.UTC(year, month - 1, 1));
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
 
@@ -140,7 +140,7 @@ class Storage {
     }
 
     // Sort by receivedTime descending
-    return errors.sort((a, b) => 
+    return errors.sort((a, b) =>
       new Date(b.receivedTime).getTime() - new Date(a.receivedTime).getTime()
     );
   }
