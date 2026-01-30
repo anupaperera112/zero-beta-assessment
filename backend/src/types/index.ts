@@ -35,6 +35,8 @@ export interface ErrorEvent {
   rawPayload: unknown;
   receivedTime: string; // ISO 8601 UTC
   validationErrors: string[];
+  idempotencyKey?: string; // Optional idempotency key for retry safety
+  contentHash?: string; // Hash of payload content for duplicate detection
 }
 
 // Monthly summary response

@@ -16,16 +16,21 @@ export class FeedHandler {
   handlePartnerA(
     payload: unknown,
     idempotencyKey?: string
-  ): { success: boolean; message: string;} {
+  ): { success: boolean; message: string; } {
     const receivedTime = new Date().toISOString();
     const validation = validatePartnerA(payload);
 
     if (!validation.isValid) {
+      // Generate content hash for duplicate detection
+      const contentHash = generateContentHash(payload);
+
       const errorEvent: ErrorEvent = {
         partnerId: 'A',
         rawPayload: payload,
         receivedTime,
-        validationErrors: validation.errors
+        validationErrors: validation.errors,
+        idempotencyKey,
+        contentHash
       };
 
       errorOrdersStream.publish(errorEvent);
@@ -59,16 +64,21 @@ export class FeedHandler {
   handlePartnerB(
     payload: unknown,
     idempotencyKey?: string
-  ): { success: boolean; message: string;} {
+  ): { success: boolean; message: string; } {
     const receivedTime = new Date().toISOString();
     const validation = validatePartnerB(payload);
 
     if (!validation.isValid) {
+      // Generate content hash for duplicate detection
+      const contentHash = generateContentHash(payload);
+
       const errorEvent: ErrorEvent = {
         partnerId: 'B',
         rawPayload: payload,
         receivedTime,
-        validationErrors: validation.errors
+        validationErrors: validation.errors,
+        idempotencyKey,
+        contentHash
       };
 
       errorOrdersStream.publish(errorEvent);

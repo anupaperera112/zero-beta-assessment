@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { api, OrderEvent } from '../api';
 import './RecentOrders.css';
 
@@ -7,26 +7,29 @@ function RecentOrders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [partnerId, setPartnerId] = useState<string>('');
-  const [limit, setLimit] = useState<number>(50);
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
 
   const fetchOrders = async () => {
     setLoading(true);
     setError(null);
     try {
-      const allOrders = await api.getOrders(partnerId || undefined);
-      // Limit the results
-      const limitedOrders = allOrders.slice(0, limit);
-      setOrders(limitedOrders);
+      // Convert date inputs to ISO 8601 format
+      const from = fromDate ? new Date(fromDate).toISOString() : undefined;
+      const to = toDate ? new Date(toDate).toISOString() : undefined;
+      
+      const allOrders = await api.getOrders(
+        partnerId || undefined,
+        from,
+        to
+      );
+      setOrders(allOrders);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch orders');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,21 +61,44 @@ function RecentOrders() {
             </div>
             
             <div className="form-group">
-              <label htmlFor="limit">Limit</label>
+              <label htmlFor="fromDate">From Date</label>
               <input
-                id="limit"
-                type="number"
-                min="1"
-                max="1000"
-                value={limit}
-                onChange={(e) => setLimit(Number(e.target.value))}
+                required
+                id="fromDate"
+                type="datetime-local"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="toDate">To Date</label>
+              <input
+                required
+                id="toDate"
+                type="datetime-local"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
               />
             </div>
           </div>
           
-          <button type="submit" className="button" disabled={loading}>
-            {loading ? 'Loading...' : 'Refresh'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" className="button" disabled={loading}>
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+            <button 
+              type="button" 
+              className="button button-secondary" 
+              onClick={() => {
+                setFromDate('');
+                setToDate('');
+                setPartnerId('');
+              }}
+            >
+              Clear Filters
+            </button>
+          </div>
         </form>
 
         {error && <div className="error">{error}</div>}

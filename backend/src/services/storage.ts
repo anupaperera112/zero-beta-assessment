@@ -11,10 +11,13 @@ import { OrderEvent, ErrorEvent } from '../types';
  */
 class Storage {
   private orders: Map<string, OrderEvent> = new Map();
-  private errors: ErrorEvent[] = [];
+  private errors: Map<string, ErrorEvent> = new Map();
   // Track idempotency keys and content hashes for duplicate detection
   private idempotencyKeys: Map<string, string> = new Map(); // idempotencyKey -> orderKey
   private contentHashes: Map<string, string> = new Map(); // contentHash -> orderKey
+  // Track error idempotency keys and content hashes for duplicate detection
+  private errorIdempotencyKeys: Map<string, string> = new Map(); // idempotencyKey -> errorKey
+  private errorContentHashes: Map<string, string> = new Map(); // contentHash -> errorKey
 
   /**
    * Idempotent insert with multiple deduplication strategies
@@ -120,12 +123,65 @@ class Storage {
     };
   }
 
-  saveError(error: ErrorEvent): void {
-    this.errors.push(error);
+  /**
+   * Idempotent insert for errors with multiple deduplication strategies
+   * Returns information about whether the error was saved or was a duplicate
+   */
+  saveError(error: ErrorEvent): { saved: boolean; duplicate: boolean; existingError?: ErrorEvent } {
+    // Strategy 1: Check idempotency key (highest priority)
+    if (error.idempotencyKey) {
+      const idempotencyKey = `${error.partnerId}-${error.idempotencyKey}`;
+      const existingKey = this.errorIdempotencyKeys.get(idempotencyKey);
+      if (existingKey) {
+        const existingError = this.errors.get(existingKey);
+        if (existingError) {
+          return { saved: false, duplicate: true, existingError };
+        }
+      }
+    }
+
+    // Strategy 2: Check content hash (fallback)
+    if (error.contentHash) {
+      const contentHashKey = `${error.partnerId}-${error.contentHash}`;
+      const existingKey = this.errorContentHashes.get(contentHashKey);
+      if (existingKey) {
+        const existingError = this.errors.get(existingKey);
+        if (existingError) {
+          return { saved: false, duplicate: true, existingError };
+        }
+      }
+    }
+
+    // Strategy 3: Check by partnerId + receivedTime + payload hash (fallback)
+    // Generate a key from partner, time, and payload content
+    const payloadHash = JSON.stringify(error.rawPayload);
+    const errorKey = `${error.partnerId}-${error.receivedTime}-${payloadHash.substring(0, 50)}`;
+    
+    if (this.errors.has(errorKey)) {
+      const existingError = this.errors.get(errorKey);
+      return { saved: false, duplicate: true, existingError };
+    }
+
+    // No duplicate found - save the error
+    this.errors.set(errorKey, error);
+
+    // Track idempotency key if provided
+    if (error.idempotencyKey) {
+      const idempotencyKey = `${error.partnerId}-${error.idempotencyKey}`;
+      this.errorIdempotencyKeys.set(idempotencyKey, errorKey);
+    }
+
+    // Track content hash if provided
+    if (error.contentHash) {
+      const contentHashKey = `${error.partnerId}-${error.contentHash}`;
+      this.errorContentHashes.set(contentHashKey, errorKey);
+    }
+
+    return { saved: true, duplicate: false };
   }
 
   getErrors(partnerId?: string, from?: Date, to?: Date): ErrorEvent[] {
-    let errors = [...this.errors];
+    let errors = Array.from(this.errors.values());
 
     if (partnerId) {
       errors = errors.filter(e => e.partnerId === partnerId);
@@ -148,9 +204,11 @@ class Storage {
   // For testing
   clear(): void {
     this.orders.clear();
-    this.errors = [];
+    this.errors.clear();
     this.idempotencyKeys.clear();
     this.contentHashes.clear();
+    this.errorIdempotencyKeys.clear();
+    this.errorContentHashes.clear();
   }
 }
 

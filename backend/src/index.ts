@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3001;
 
 // Initialize stream subscriptions (decoupled architecture)
 // This sets up the event-driven flow where processors consume from streams
-errorOrdersStream.subscribe((error: ErrorEvent) => errorProcessor.processError(error));
+errorOrdersStream.subscribe((error: ErrorEvent) => {errorProcessor.processError(error)});
 validOrdersStream.subscribe((order: OrderEvent) => {
   orderProcessor.processOrder(order);
 });
