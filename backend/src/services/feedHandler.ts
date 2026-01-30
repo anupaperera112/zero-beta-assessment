@@ -5,12 +5,18 @@ import { sequenceManager } from './sequenceManager';
 import { validOrdersStream, errorOrdersStream } from './streams';
 import { orderProcessor } from './orderProcessor';
 import { errorProcessor } from './errorProcessor';
+import { generateContentHash, extractIdempotencyKey } from '../utils/idempotency';
 
 export class FeedHandler {
   /**
    * Process an event from Partner A
+   * @param payload - The order payload from Partner A
+   * @param idempotencyKey - Optional idempotency key from request headers
    */
-  handlePartnerA(payload: unknown): { success: boolean; orderEvent?: OrderEvent; errorEvent?: ErrorEvent } {
+  handlePartnerA(
+    payload: unknown, 
+    idempotencyKey?: string
+  ): { success: boolean; orderEvent?: OrderEvent; errorEvent?: ErrorEvent; duplicate?: boolean } {
     const receivedTime = new Date().toISOString();
     const validation = validatePartnerA(payload);
 
@@ -30,18 +36,38 @@ export class FeedHandler {
 
     const event = payload as PartnerAEvent;
     const sequenceNumber = sequenceManager.getNextSequence('A');
-    const orderEvent = transformPartnerA(event, 'A', sequenceNumber, receivedTime);
+    
+    // Generate content hash for duplicate detection (fallback if no idempotency key)
+    const contentHash = generateContentHash(payload);
+    
+    const orderEvent = transformPartnerA(
+      event, 
+      'A', 
+      sequenceNumber, 
+      receivedTime, 
+      idempotencyKey,
+      contentHash
+    );
 
     validOrdersStream.publish(orderEvent);
-    orderProcessor.processOrder(orderEvent);
+    const processResult = orderProcessor.processOrder(orderEvent);
 
-    return { success: true, orderEvent };
+    return { 
+      success: true, 
+      orderEvent: processResult.existingOrder || orderEvent,
+      duplicate: processResult.duplicate
+    };
   }
 
   /**
    * Process an event from Partner B
+   * @param payload - The order payload from Partner B
+   * @param idempotencyKey - Optional idempotency key from request headers
    */
-  handlePartnerB(payload: unknown): { success: boolean; orderEvent?: OrderEvent; errorEvent?: ErrorEvent } {
+  handlePartnerB(
+    payload: unknown,
+    idempotencyKey?: string
+  ): { success: boolean; orderEvent?: OrderEvent; errorEvent?: ErrorEvent; duplicate?: boolean } {
     const receivedTime = new Date().toISOString();
     const validation = validatePartnerB(payload);
 
@@ -61,12 +87,27 @@ export class FeedHandler {
 
     const event = payload as PartnerBEvent;
     const sequenceNumber = sequenceManager.getNextSequence('B');
-    const orderEvent = transformPartnerB(event, 'B', sequenceNumber, receivedTime);
+    
+    // Generate content hash for duplicate detection (fallback if no idempotency key)
+    const contentHash = generateContentHash(payload);
+    
+    const orderEvent = transformPartnerB(
+      event, 
+      'B', 
+      sequenceNumber, 
+      receivedTime,
+      idempotencyKey,
+      contentHash
+    );
 
     validOrdersStream.publish(orderEvent);
-    orderProcessor.processOrder(orderEvent);
+    const processResult = orderProcessor.processOrder(orderEvent);
 
-    return { success: true, orderEvent };
+    return { 
+      success: true, 
+      orderEvent: processResult.existingOrder || orderEvent,
+      duplicate: processResult.duplicate
+    };
   }
 }
 

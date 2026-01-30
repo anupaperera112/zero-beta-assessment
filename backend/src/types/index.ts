@@ -25,6 +25,8 @@ export interface OrderEvent {
   receivedTime: string; // ISO 8601 UTC
   streamOffset: number;
   processedTime: string; // ISO 8601 UTC
+  idempotencyKey?: string; // Optional idempotency key for retry safety
+  contentHash?: string; // Hash of payload content for duplicate detection
 }
 
 // Error event

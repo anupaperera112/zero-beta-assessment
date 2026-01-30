@@ -1,17 +1,34 @@
 import { Router, Request, Response } from 'express';
 import { feedHandler } from '../services/feedHandler';
+import { optionalApiKeyAuth } from '../middleware/auth';
+import { extractIdempotencyKey } from '../utils/idempotency';
 
 const router = Router();
 
 /**
  * POST /api/feed/partner-a
  * Accept order events from Partner A
+ * Optional API key authentication via X-API-Key header or apiKey query parameter
+ * Optional idempotency key via Idempotency-Key or X-Idempotency-Key header for retry safety
  */
-router.post('/partner-a', (req: Request, res: Response) => {
+router.post('/partner-a', optionalApiKeyAuth, (req: Request, res: Response) => {
   try {
-    const result = feedHandler.handlePartnerA(req.body);
+    // Extract idempotency key from headers
+    const idempotencyKey = extractIdempotencyKey(req.headers);
+    
+    const result = feedHandler.handlePartnerA(req.body, idempotencyKey);
     
     if (result.success) {
+      // If duplicate was detected, return 200 with existing order (idempotent)
+      if (result.duplicate) {
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Order already processed (duplicate detected)',
+          orderEvent: result.orderEvent,
+          duplicate: true
+        });
+      }
+      
       res.status(200).json({ 
         success: true, 
         message: 'Order processed successfully',
@@ -33,12 +50,27 @@ router.post('/partner-a', (req: Request, res: Response) => {
 /**
  * POST /api/feed/partner-b
  * Accept order events from Partner B
+ * Optional API key authentication via X-API-Key header or apiKey query parameter
+ * Optional idempotency key via Idempotency-Key or X-Idempotency-Key header for retry safety
  */
-router.post('/partner-b', (req: Request, res: Response) => {
+router.post('/partner-b', optionalApiKeyAuth, (req: Request, res: Response) => {
   try {
-    const result = feedHandler.handlePartnerB(req.body);
+    // Extract idempotency key from headers
+    const idempotencyKey = extractIdempotencyKey(req.headers);
+    
+    const result = feedHandler.handlePartnerB(req.body, idempotencyKey);
     
     if (result.success) {
+      // If duplicate was detected, return 200 with existing order (idempotent)
+      if (result.duplicate) {
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Order already processed (duplicate detected)',
+          orderEvent: result.orderEvent,
+          duplicate: true
+        });
+      }
+      
       res.status(200).json({ 
         success: true, 
         message: 'Order processed successfully',

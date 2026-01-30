@@ -4,7 +4,9 @@ export function transformPartnerA(
   event: PartnerAEvent,
   partnerId: string,
   sequenceNumber: number,
-  receivedTime: string
+  receivedTime: string,
+  idempotencyKey?: string,
+  contentHash?: string
 ): OrderEvent {
   // Convert epoch milliseconds to ISO 8601 UTC
   const eventTime = new Date(event.transactionTimeMs).toISOString();
@@ -24,7 +26,9 @@ export function transformPartnerA(
     sequenceNumber,
     receivedTime,
     streamOffset: 0, // In-memory implementation
-    processedTime
+    processedTime,
+    idempotencyKey,
+    contentHash
   };
 }
 
@@ -32,7 +36,9 @@ export function transformPartnerB(
   event: PartnerBEvent,
   partnerId: string,
   sequenceNumber: number,
-  receivedTime: string
+  receivedTime: string,
+  idempotencyKey?: string,
+  contentHash?: string
 ): OrderEvent {
   // Convert YYYY-MM-DD HH:mm:ss to ISO 8601 UTC
   // Assume the timestamp is in UTC (or adjust as needed)
@@ -56,6 +62,8 @@ export function transformPartnerB(
     sequenceNumber,
     receivedTime,
     streamOffset: 0,
-    processedTime
+    processedTime,
+    idempotencyKey,
+    contentHash
   };
 }

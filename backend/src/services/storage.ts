@@ -4,19 +4,70 @@ import { OrderEvent, ErrorEvent } from '../types';
  * In-memory storage implementation
  * In production, this would be replaced with DynamoDB, RDS, or another database
  * 
- * For idempotency, we use a composite key: partnerId + sequenceNumber
+ * For idempotency, we use multiple strategies:
+ * 1. Idempotency key (if provided by client) - partnerId + idempotencyKey
+ * 2. Content hash (fallback) - partnerId + contentHash
+ * 3. Sequence number (legacy) - partnerId + sequenceNumber
  */
 class Storage {
   private orders: Map<string, OrderEvent> = new Map();
   private errors: ErrorEvent[] = [];
+  // Track idempotency keys and content hashes for duplicate detection
+  private idempotencyKeys: Map<string, string> = new Map(); // idempotencyKey -> orderKey
+  private contentHashes: Map<string, string> = new Map(); // contentHash -> orderKey
 
-  // Idempotent insert - uses partnerId + sequenceNumber as key
-  saveOrder(order: OrderEvent): void {
-    const key = `${order.partnerId}-${order.sequenceNumber}`;
-    // Only insert if not exists (idempotency)
-    if (!this.orders.has(key)) {
-      this.orders.set(key, order);
+  /**
+   * Idempotent insert with multiple deduplication strategies
+   * Returns true if order was saved, false if duplicate was detected
+   */
+  saveOrder(order: OrderEvent): { saved: boolean; duplicate: boolean; existingOrder?: OrderEvent } {
+    // Strategy 1: Check idempotency key (highest priority)
+    if (order.idempotencyKey) {
+      const idempotencyKey = `${order.partnerId}-${order.idempotencyKey}`;
+      const existingKey = this.idempotencyKeys.get(idempotencyKey);
+      if (existingKey) {
+        const existingOrder = this.orders.get(existingKey);
+        if (existingOrder) {
+          return { saved: false, duplicate: true, existingOrder };
+        }
+      }
     }
+
+    // Strategy 2: Check content hash (fallback)
+    if (order.contentHash) {
+      const contentHashKey = `${order.partnerId}-${order.contentHash}`;
+      const existingKey = this.contentHashes.get(contentHashKey);
+      if (existingKey) {
+        const existingOrder = this.orders.get(existingKey);
+        if (existingOrder) {
+          return { saved: false, duplicate: true, existingOrder };
+        }
+      }
+    }
+
+    // Strategy 3: Check sequence number (legacy support)
+    const sequenceKey = `${order.partnerId}-${order.sequenceNumber}`;
+    if (this.orders.has(sequenceKey)) {
+      const existingOrder = this.orders.get(sequenceKey);
+      return { saved: false, duplicate: true, existingOrder };
+    }
+
+    // No duplicate found - save the order
+    this.orders.set(sequenceKey, order);
+
+    // Track idempotency key if provided
+    if (order.idempotencyKey) {
+      const idempotencyKey = `${order.partnerId}-${order.idempotencyKey}`;
+      this.idempotencyKeys.set(idempotencyKey, sequenceKey);
+    }
+
+    // Track content hash if provided
+    if (order.contentHash) {
+      const contentHashKey = `${order.partnerId}-${order.contentHash}`;
+      this.contentHashes.set(contentHashKey, sequenceKey);
+    }
+
+    return { saved: true, duplicate: false };
   }
 
   getOrders(partnerId?: string, from?: Date, to?: Date): OrderEvent[] {
@@ -98,6 +149,8 @@ class Storage {
   clear(): void {
     this.orders.clear();
     this.errors = [];
+    this.idempotencyKeys.clear();
+    this.contentHashes.clear();
   }
 }
 
