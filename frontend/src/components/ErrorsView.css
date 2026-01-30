@@ -1,0 +1,52 @@
+.errors-list {
+  margin-top: 1rem;
+}
+
+.error-item {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.error-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ffc107;
+}
+
+.error-partner {
+  font-weight: 600;
+  color: #856404;
+}
+
+.error-time {
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+.error-payload {
+  margin-bottom: 1rem;
+}
+
+.error-payload pre {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.error-messages ul {
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.error-messages li {
+  margin-bottom: 0.25rem;
+  color: #856404;
+}
