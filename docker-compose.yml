@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    image: zerobeta-backend:latest
+    env_file: ./backend/.env
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    image: zerobeta-frontend:latest
+    env_file: ./frontend/.env
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

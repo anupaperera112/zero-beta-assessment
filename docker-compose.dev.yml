@@ -1,0 +1,28 @@
+services:
+  backend:
+    image: node:18-bullseye-slim
+    working_dir: /app
+    command: npm run dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+
+  frontend:
+    image: node:18-bullseye-slim
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - ./frontend/.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"

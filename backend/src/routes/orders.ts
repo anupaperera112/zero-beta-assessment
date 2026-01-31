@@ -6,7 +6,7 @@ const router = Router();
 /**
  * GET /api/orders
  * Fetch orders between two times
- * Query params: partnerId (optional), from (ISO 8601), to (ISO 8601)
+ * Query params: partnerId, from (ISO 8601), to (ISO 8601)
  */
 router.get('/', (req: Request, res: Response) => {
   try {
