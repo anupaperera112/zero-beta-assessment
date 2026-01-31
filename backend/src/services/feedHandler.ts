@@ -9,19 +9,39 @@ import { eventsProcessed, errorsTotal } from "../metrics";
 
 export class FeedHandler {
 	/**
-	 * Process an event from Partner A
-	 * @param payload - The order payload from Partner A
+	 * Process an event from either Partner A or B
+	 * @param payload - The order payload
+	 * @param partnerId - Partner identifier ('A' or 'B')
 	 * @param idempotencyKey - Optional idempotency key from request headers
 	 */
-	handlePartnerA(
+	handlePartner(
 		payload: unknown,
+		partnerId: "A" | "B",
 		idempotencyKey?: string,
 	): { success: boolean; message: string } {
 		const receivedTime = new Date().toISOString();
+
+		switch (partnerId) {
+			case "A":
+				return this.processPartnerA(payload, receivedTime, idempotencyKey);
+			case "B":
+				return this.processPartnerB(payload, receivedTime, idempotencyKey);
+			default:
+				return {
+					success: false,
+					message: "Invalid partner ID",
+				};
+		}
+	}
+
+	private processPartnerA(
+		payload: unknown,
+		receivedTime: string,
+		idempotencyKey?: string,
+	): { success: boolean; message: string } {
 		const validation = validatePartnerA(payload);
 
 		if (!validation.isValid) {
-			// Generate content hash for duplicate detection
 			const contentHash = generateContentHash(payload);
 
 			const errorEvent: ErrorEvent = {
@@ -47,8 +67,6 @@ export class FeedHandler {
 
 		const event = payload as PartnerAEvent;
 		const sequenceNumber = sequenceManager.getNextSequence("A");
-
-		// Generate content hash for duplicate detection (fallback if no idempotency key)
 		const contentHash = generateContentHash(payload);
 
 		const orderEvent = transformPartnerA(
@@ -69,20 +87,14 @@ export class FeedHandler {
 		return { success: true, message: "Order event queued successfully." };
 	}
 
-	/**
-	 * Process an event from Partner B
-	 * @param payload - The order payload from Partner B
-	 * @param idempotencyKey - Optional idempotency key from request headers
-	 */
-	handlePartnerB(
+	private processPartnerB(
 		payload: unknown,
+		receivedTime: string,
 		idempotencyKey?: string,
 	): { success: boolean; message: string } {
-		const receivedTime = new Date().toISOString();
 		const validation = validatePartnerB(payload);
 
 		if (!validation.isValid) {
-			// Generate content hash for duplicate detection
 			const contentHash = generateContentHash(payload);
 
 			const errorEvent: ErrorEvent = {
@@ -109,8 +121,6 @@ export class FeedHandler {
 
 		const event = payload as PartnerBEvent;
 		const sequenceNumber = sequenceManager.getNextSequence("B");
-
-		// Generate content hash for duplicate detection (fallback if no idempotency key)
 		const contentHash = generateContentHash(payload);
 
 		const orderEvent = transformPartnerB(

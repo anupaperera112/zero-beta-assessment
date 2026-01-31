@@ -60,7 +60,7 @@ app.listen(PORT, () => {
 	logger.info({ port: PORT }, "server_started");
 	logger.info({ url: `http://localhost:${PORT}/health` }, "health_check");
 	logger.info(
-		{ endpoints: ["/api/feed/partner-a", "/api/feed/partner-b"] },
+		{ endpoints: ["/api/feed/partner"] },
 		"feed_endpoints",
 	);
 	const partners = partnerService.getAllPartners();

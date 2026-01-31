@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import RecentOrders from './components/RecentOrders';
-import MonthlySummary from './components/MonthlySummary';
-import ErrorsView from './components/ErrorsView';
+import RecentOrders from './pages/RecentOrders';
+import MonthlySummary from './pages/MonthlySummary';
+import ErrorsView from './pages/ErrorsView';
 import './App.css';
 
 function App() {

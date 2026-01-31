@@ -12,15 +12,8 @@ import { partnerService } from '../services/partnerService';
  * - Query parameter: apiKey
  */
 export const optionalApiKeyAuth = (req: Request, res: Response, next: NextFunction) => {
-  // Extract partner ID from route (partner-a or partner-b)
-  const routePath = req.path.toLowerCase();
-  let partnerId: string | undefined;
 
-  if (routePath.includes('partner-a')) {
-    partnerId = 'A';
-  } else if (routePath.includes('partner-b')) {
-    partnerId = 'B';
-  }
+  const partnerId = (req.query && (req.query.partner as string)) || "";
 
   if (!partnerId) {
     return res.status(400).json({ error: 'Invalid partner endpoint' });

@@ -45,6 +45,11 @@ npm run dev
 Backend default: http://localhost:3001
 Frontend default: http://localhost:3000
 
+or with docker
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
 ## What it does (high level)
 
 - Accepts partner-specific events for Partner A and Partner B.
@@ -66,7 +71,7 @@ Frontend default: http://localhost:3000
 Example: submit Partner A event
 
 ```bash
-curl -X POST http://localhost:3001/api/feed/partner-a \
+curl -X POST http://localhost:3001/api/feed/partner?partner=A \
   -H "X-API-Key: secret-key-pat-a" \
   -H "Content-Type: application/json" \
   -d '{"skuId":"SKU-1001","transactionTimeMs":1733059200123,"amount":25.50}'
@@ -75,7 +80,7 @@ curl -X POST http://localhost:3001/api/feed/partner-a \
 Example: submit Partner B event
 
 ```bash
-curl -X POST http://localhost:3001/api/feed/partner-b \
+curl -X POST http://localhost:3001/api/feed/partner?partner=A \
   -H "X-API-Key: secret-key-pat-b" \
   -H "Content-Type: application/json" \
   -d '{"itemCode":"IT-900","purchaseTime":"2026-01-28 10:12:30","total":100.00,"discount":10.00}'
