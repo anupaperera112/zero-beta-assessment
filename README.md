@@ -80,7 +80,7 @@ curl -X POST http://localhost:3001/api/feed/partner?partner=A \
 Example: submit Partner B event
 
 ```bash
-curl -X POST http://localhost:3001/api/feed/partner?partner=A \
+curl -X POST http://localhost:3001/api/feed/partner?partner=B \
   -H "X-API-Key: secret-key-pat-b" \
   -H "Content-Type: application/json" \
   -d '{"itemCode":"IT-900","purchaseTime":"2026-01-28 10:12:30","total":100.00,"discount":10.00}'

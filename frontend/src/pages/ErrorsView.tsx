@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { api, ErrorEvent } from "../api";
 import "./ErrorsView.css";
+import PartnerSelector from "../components/PartnerSelector";
+import DateSelector from "../components/DateSelector";
+import ErrorScreen from "../components/LoadingScreen";
 
 function ErrorsView() {
 	const [errors, setErrors] = useState<ErrorEvent[]>([]);
@@ -47,40 +50,18 @@ function ErrorsView() {
 
 				<form onSubmit={handleSubmit} className="filter-form">
 					<div className="form-row">
-						<div className="form-group">
-							<label htmlFor="partnerId">Partner ID</label>
-							<select
-								id="partnerId"
-								value={partnerId}
-								onChange={(e) => setPartnerId(e.target.value)}
-							>
-								<option value="">All Partners</option>
-								<option value="A">Partner A</option>
-								<option value="B">Partner B</option>
-							</select>
-						</div>
+						<PartnerSelector
+							partnerId={partnerId}
+							setPartnerId={setPartnerId}
+						/>
 
-						<div className="form-group">
-							<label htmlFor="fromDate">From Date</label>
-							<input
-								required
-								id="fromDate"
-								type="datetime-local"
-								value={fromDate}
-								onChange={(e) => setFromDate(e.target.value)}
-							/>
-						</div>
+						<DateSelector
+							title="From Date"
+							date={fromDate}
+							setDate={setFromDate}
+						/>
 
-						<div className="form-group">
-							<label htmlFor="toDate">To Date</label>
-							<input
-								required
-								id="toDate"
-								type="datetime-local"
-								value={toDate}
-								onChange={(e) => setToDate(e.target.value)}
-							/>
-						</div>
+						<DateSelector title="To Date" date={toDate} setDate={setToDate} />
 					</div>
 
 					<div className="form-actions">
@@ -101,7 +82,7 @@ function ErrorsView() {
 					</div>
 				</form>
 
-				{error && <div className="error">{error}</div>}
+				{error && <ErrorScreen error={error} />}
 
 				{loading && <div className="loading">Loading errors...</div>}
 

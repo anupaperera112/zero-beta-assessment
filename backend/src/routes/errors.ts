@@ -1,14 +1,15 @@
 import { Router, Request, Response } from "express";
 import { storage } from "../services/storage";
-
+import { apiKeyAuthDashboard } from "../middleware/auth";
 const router = Router();
 
 /**
  * GET /api/errors
  * Fetch validation errors
  * Query params: partnerId (optional), from (ISO 8601, optional), to (ISO 8601, optional)
+ * Requires authentication via apiKeyAuthDashboard middleware
  */
-router.get("/", (req: Request, res: Response) => {
+router.get("/", apiKeyAuthDashboard, (req: Request, res: Response) => {
 	try {
 		const partnerId = req.query.partnerId as string | undefined;
 		const fromStr = req.query.from as string | undefined;

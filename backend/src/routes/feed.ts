@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { feedHandler } from "../services/feedHandler";
-import { optionalApiKeyAuth } from "../middleware/auth";
+import { apiKeyAuthPartner } from "../middleware/auth";
 import { extractIdempotencyKey } from "../utils/idempotency";
 import logger from "../utils/logger";
 
@@ -12,7 +12,7 @@ const router = Router();
  * API key authentication via X-API-Key header or apiKey query parameter
  * Idempotency key via Idempotency-Key or X-Idempotency-Key header for retry safety
  */
-router.post("/partner", optionalApiKeyAuth, (req: Request, res: Response) => {
+router.post("/partner", apiKeyAuthPartner, (req: Request, res: Response) => {
 	try {
 		// Extract idempotency key from headers
 		const idempotencyKey = extractIdempotencyKey(req.headers);

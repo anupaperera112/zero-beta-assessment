@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api, MonthlySummary as MonthlySummaryType } from '../api';
 import './MonthlySummary.css';
+import PartnerSelector from '../components/PartnerSelector';
 
 function MonthlySummary() {
   const [summary, setSummary] = useState<MonthlySummaryType | null>(null);
@@ -51,18 +52,10 @@ function MonthlySummary() {
         
         <form onSubmit={handleSubmit} className="summary-form">
           <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="partnerId">Partner ID</label>
-              <select
-                id="partnerId"
-                value={partnerId}
-                onChange={(e) => setPartnerId(e.target.value)}
-                required
-              >
-                <option value="A">Partner A</option>
-                <option value="B">Partner B</option>
-              </select>
-            </div>
+						<PartnerSelector
+							partnerId={partnerId}
+							setPartnerId={setPartnerId}
+						/>
             
             <div className="form-group">
               <label htmlFor="month">Month (MM-YYYY)</label>
