@@ -5,7 +5,8 @@ services:
     command: npm run dev
     volumes:
       - ./backend:/app
-      - /app/node_modules
+      - ./backend/package.json:/app/package.json
+      - ./backend/package-lock.json:/app/package-lock.json
     env_file:
       - ./backend/.env
     environment:

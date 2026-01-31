@@ -16,11 +16,12 @@ README.md   # This file
 Prerequisites: Node.js 18+ and npm.
 
 Backend (dev):
-
+```bash
 create the .env file:
 PORT = 3001
 PARTNER_A_API_KEY=secret-key-pat-a
 PARTNER_B_API_KEY=secret-key-pat-b
+```
 
 ```bash
 cd backend
@@ -30,8 +31,10 @@ npm run dev
 
 Frontend (dev):
 
+```bash
 create the .env file:
 VITE_API_URL = http://localhost:3001
+```
 
 ```bash
 cd frontend
