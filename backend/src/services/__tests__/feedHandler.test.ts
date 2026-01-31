@@ -24,24 +24,6 @@ describe('FeedHandler', () => {
       expect(result.message).toBe('Order event queued successfully.');
     });
 
-    // it('should increment sequence numbers', () => {
-    //   const event1 = {
-    //     skuId: 'SKU-1001',
-    //     transactionTimeMs: 1733059200123,
-    //     amount: 25.50
-    //   };
-    //   const event2 = {
-    //     skuId: 'SKU-1002',
-    //     transactionTimeMs: 1733059201000,
-    //     amount: 30.00
-    //   };
-
-    //   feedHandler.handlePartnerA(event1);
-    //   const result2 = feedHandler.handlePartnerA(event2);
-
-    //   expect(result2.orderEvent?.sequenceNumber).toBe(2);
-    // });
-
     it('should reject invalid Partner A event', () => {
       const event = {
         skuId: '',

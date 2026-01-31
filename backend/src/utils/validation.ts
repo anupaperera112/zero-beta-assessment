@@ -15,7 +15,7 @@ export function validatePartnerA(payload: unknown): ValidationResult {
   const event = payload as Partial<PartnerAEvent>;
 
   // Check skuId
-  if (!event.skuId) {
+  if (event.skuId === undefined || event.skuId === null) {
     errors.push('skuId is required');
   } else if (typeof event.skuId !== 'string' || event.skuId.trim() === '') {
     errors.push('skuId must be a non-empty string');
@@ -53,7 +53,7 @@ export function validatePartnerB(payload: unknown): ValidationResult {
   const event = payload as Partial<PartnerBEvent>;
 
   // Check itemCode
-  if (!event.itemCode) {
+  if (event.itemCode === undefined || event.itemCode === null) {
     errors.push('itemCode is required');
   } else if (typeof event.itemCode !== 'string' || event.itemCode.trim() === '') {
     errors.push('itemCode must be a non-empty string');
