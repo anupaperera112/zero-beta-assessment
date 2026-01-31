@@ -62,14 +62,13 @@ docker compose up --build
 
 ## Important endpoints
 
-- POST /api/feed/partner-a — submit Partner A events
-- POST /api/feed/partner-b — submit Partner B events
+- POST /api/feed/partner — submit Partner events
 - GET /api/orders — list orders (optional query: `partnerId`, `from`, `to`)
 - GET /api/orders/summary/monthly — monthly summary (query: `partnerId`, `month`=MM-YYYY)
 - GET /api/errors — list validation errors (optional query: `partnerId`, `from`, `to`)
 - GET /health — health check
 
-Example: submit Partner A event
+Example: submit Partner A event (can use the simulator also)
 
 ```bash
 curl -X POST http://localhost:3001/api/feed/partner?partner=A \
@@ -125,7 +124,6 @@ Internal `OrderEvent` (normalized) includes fields such as:
 - Storage: in-memory for development (replace with a DB in prod).
 - Streams: in-memory queues for dev; production would use SQS/EventBridge/Kinesis/MSK.
 - Processing: synchronous for simplicity; production would use async workers.
-- No authentication on APIs (add API keys or OAuth in production).
 
 ## Tests
 
