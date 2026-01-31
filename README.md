@@ -141,6 +141,15 @@ npm test
 - Add pagination to API responses for large datasets.
 - Replace in-memory persistence with a small DB (SQLite/DynamoDB/Postgres) for demo production.
 
-## License
+## python simulator
+create the venv
+```bash
+pip install -r requirements.txt
+```
 
-ISC
+# Only valid requests (happy path)
+python partner-sim.py --mode valid --count 10
+
+# Chaos testing (random + invalid)
+python partner-sim.py --mode random --count 50 --delay 0.5
+

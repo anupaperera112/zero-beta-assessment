@@ -126,7 +126,7 @@ class Storage {
 	}
 
 	getMonthlySummary(
-		partnerId: string,
+		partnerId: string | undefined,
 		month: number,
 		year: number,
 	): {

@@ -30,10 +30,6 @@ function ErrorsView() {
 		}
 	};
 
-	useEffect(() => {
-		fetchErrors();
-	}, []);
-
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		fetchErrors();

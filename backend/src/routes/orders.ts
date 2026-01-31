@@ -53,10 +53,6 @@ router.get(
 			const partnerId = req.query.partnerId as string | undefined;
 			const monthStr = req.query.month as string | undefined;
 
-			if (!partnerId) {
-				return res.status(400).json({ error: "partnerId is required" });
-			}
-
 			if (!monthStr) {
 				return res
 					.status(400)
