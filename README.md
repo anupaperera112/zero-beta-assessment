@@ -21,6 +21,7 @@ create the .env file:
 PORT = 3001
 PARTNER_A_API_KEY=secret-key-pat-a
 PARTNER_B_API_KEY=secret-key-pat-b
+DASHBOARD_API_KEY=secret-key-dashboard
 ```
 
 ```bash
@@ -47,7 +48,7 @@ Frontend default: http://localhost:3000
 
 or with docker
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+docker compose up --build
 ```
 
 ## What it does (high level)

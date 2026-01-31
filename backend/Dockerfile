@@ -12,11 +12,8 @@ RUN npm ci
 # Copy source code
 COPY src ./src
 
-# Build TypeScript
-RUN npm run build
-
 # Expose port
 EXPOSE 3001
 
 # Start server
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]

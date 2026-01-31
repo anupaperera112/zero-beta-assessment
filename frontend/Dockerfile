@@ -14,18 +14,8 @@ RUN npm ci
 COPY src ./src
 COPY index.html ./
 
-# Build
-RUN npm run build
+# Expose port
+EXPOSE 3000
 
-# Production stage
-FROM nginx:alpine
-
-# Copy built files
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx config (optional)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Start server
+CMD ["npm", "run", "dev"]
