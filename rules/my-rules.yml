@@ -1,0 +1,17 @@
+rules:
+  - id: fyp-xss-innerhtml
+    patterns:
+      - pattern: $OBJ.innerHTML = $SRC
+    message: "Potential XSS: assignment to innerHTML detected. Use textContent instead."
+    languages: [typescript, javascript]
+    severity: ERROR
+
+  - id: fyp-sql-injection
+    patterns:
+      - pattern: |
+          $QUERY = `...` + $VAR;
+          ...
+          $CLIENT.query($QUERY);
+    message: "Potential SQL Injection: Use parameterized queries instead of string concatenation."
+    languages: [typescript, javascript]
+    severity: ERROR
