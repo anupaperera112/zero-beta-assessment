@@ -1,0 +1,40 @@
+name: "FYP Semgrep Plugin"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # Required to post comments
+      contents: read        # Required to check out code
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          pip install semgrep requests
+
+      - name: Run Semgrep with Custom Rules
+        # Replace './rules' with the actual path to your custom TS/JS rules
+        run: |
+          semgrep scan --config ./rules --json --output results.json
+        continue-on-error: true 
+
+      - name: Run Commenter Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # These are provided automatically by GitHub Actions
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python scripts/commenter.py
